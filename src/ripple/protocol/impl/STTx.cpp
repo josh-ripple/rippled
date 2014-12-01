@@ -176,8 +176,7 @@ Blob STTx::getSignature () const
 
 void STTx::sign (RippleAddress const& private_key)
 {
-    Blob signature;
-    private_key.accountPrivateSign (getSigningHash (), signature);
+    Blob const signature = private_key.accountPrivateSign (getSigningHash());
     setFieldVL (sfTxnSignature, signature);
 }
 

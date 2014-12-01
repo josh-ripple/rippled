@@ -72,12 +72,16 @@ public:
         expect (naAccountPublic1.humanAccountPublic () == "aBPXpTfuLy1Bhk3HnGTTAqnovpKWQ23NpFMNkAF6F1Atg5vDyPrw", naAccountPublic1.humanAccountPublic ());
 
         // Check account signing.
-        expect (naAccountPrivate0.accountPrivateSign (uHash, vucTextSig), "Signing failed.");
+        vucTextSig = naAccountPrivate0.accountPrivateSign (uHash);
+
+        expect (!vucTextSig.empty(), "Signing failed.");
         expect (naAccountPublic0.accountPublicVerify (uHash, vucTextSig, ECDSA::strict), "Verify failed.");
         expect (!naAccountPublic1.accountPublicVerify (uHash, vucTextSig, ECDSA::not_strict), "Anti-verify failed.");
         expect (!naAccountPublic1.accountPublicVerify (uHash, vucTextSig, ECDSA::strict), "Anti-verify failed.");
 
-        expect (naAccountPrivate1.accountPrivateSign (uHash, vucTextSig), "Signing failed.");
+        vucTextSig = naAccountPrivate1.accountPrivateSign (uHash);
+
+        expect (!vucTextSig.empty(), "Signing failed.");
         expect (naAccountPublic1.accountPublicVerify (uHash, vucTextSig, ECDSA::strict), "Verify failed.");
         expect (!naAccountPublic0.accountPublicVerify (uHash, vucTextSig, ECDSA::not_strict), "Anti-verify failed.");
         expect (!naAccountPublic0.accountPublicVerify (uHash, vucTextSig, ECDSA::strict), "Anti-verify failed.");

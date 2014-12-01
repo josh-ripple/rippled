@@ -159,7 +159,7 @@ public:
     void setAccountPrivate (RippleAddress const& naGenerator,
                             RippleAddress const& naSeed, int seq);
 
-    bool accountPrivateSign (uint256 const& uHash, Blob& vucSig) const;
+    Blob accountPrivateSign (uint256 const& uHash) const;
 
     // Encrypt a message.
     Blob accountPrivateEncrypt (

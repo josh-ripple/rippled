@@ -556,15 +556,15 @@ void RippleAddress::setAccountPrivate (
     setAccountPrivate (secretKey);
 }
 
-bool RippleAddress::accountPrivateSign (uint256 const& uHash, Blob& vucSig) const
+Blob RippleAddress::accountPrivateSign (uint256 const& uHash) const
 {
-    vucSig = ECDSASign (uHash, getAccountPrivate());
-    const bool ok = !vucSig.empty();
+    Blob result = ECDSASign (uHash, getAccountPrivate());
+    const bool ok = !result.empty();
 
     CondLog (!ok, lsWARNING, RippleAddress)
             << "accountPrivateSign: Signing failed.";
 
-    return ok;
+    return result;
 }
 
 Blob RippleAddress::accountPrivateEncrypt (
