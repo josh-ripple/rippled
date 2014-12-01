@@ -486,8 +486,10 @@ void RippleAddress::setAccountPublic (RippleAddress const& generator, int seq)
 }
 
 bool RippleAddress::accountPublicVerify (
-    uint256 const& uHash, Blob const& vucSig, ECDSA fullyCanonical) const
+    Blob const& message, Blob const& vucSig, ECDSA fullyCanonical) const
 {
+    uint256 const uHash = getSHA512Half (message);
+
     return verifySignature (getAccountPublic(), uHash, vucSig, fullyCanonical);
 }
 
@@ -556,8 +558,10 @@ void RippleAddress::setAccountPrivate (
     setAccountPrivate (secretKey);
 }
 
-Blob RippleAddress::accountPrivateSign (uint256 const& uHash) const
+Blob RippleAddress::accountPrivateSign (Blob const& message) const
 {
+    uint256 const uHash = getSHA512Half (message);
+
     Blob result = ECDSASign (uHash, getAccountPrivate());
     const bool ok = !result.empty();
 
