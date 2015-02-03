@@ -110,6 +110,7 @@
 #include <ripple/rpc/tests/JsonObject.test.cpp>
 #include <ripple/rpc/tests/JSONRPC.test.cpp>
 #include <ripple/rpc/tests/JsonWriter.test.cpp>
+#include <ripple/rpc/tests/KeyGeneration.test.cpp>
 #include <ripple/rpc/tests/Status.test.cpp>
 #include <ripple/rpc/tests/WriteJson.test.cpp>
 #include <ripple/rpc/tests/Yield.test.cpp>
