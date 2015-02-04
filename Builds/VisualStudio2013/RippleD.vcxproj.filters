@@ -3813,6 +3813,12 @@
     <ClInclude Include="..\..\src\ripple\rpc\impl\JsonWriter.h">
       <Filter>ripple\rpc\impl</Filter>
     </ClInclude>
+    <ClCompile Include="..\..\src\ripple\rpc\impl\KeypairForSignature.cpp">
+      <Filter>ripple\rpc\impl</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\src\ripple\rpc\impl\KeypairForSignature.h">
+      <Filter>ripple\rpc\impl</Filter>
+    </ClInclude>
     <ClCompile Include="..\..\src\ripple\rpc\impl\LegacyPathFind.cpp">
       <Filter>ripple\rpc\impl</Filter>
     </ClCompile>
