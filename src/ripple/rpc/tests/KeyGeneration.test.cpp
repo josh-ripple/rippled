@@ -56,6 +56,17 @@ static key_strings const secp256k1_strings =
     "1949ECD889EA71324BC7A30C8E81F4E93CB73EE19D59E9082111E78CC3DDABC2",
 };
 
+static key_strings const ed25519_strings =
+{
+    "r4qV6xTXerqaZav3MJfSY79ynmc1BSBev1",
+    common::master_key,
+    common::master_seed,
+    common::master_seed_hex,
+    "aKEQmgLMyZPMruJFejUuedp169LgW6DbJt1rej1DJ5hWUMH4pHJ7",
+    "ED54C3F5BEDA8BD588B203D23A27398FAD9D20F88A974007D6994659CD7273FE1D",
+    "77AAED2698D56D6676323629160F4EEF21CFD9EE3D0745CC78FA291461F98278",
+};
+
 class WalletPropose_test : public ripple::TestSuite
 {
 public:
@@ -111,10 +122,32 @@ public:
         testLegacyPassphrase (secp256k1_strings.master_seed_hex);
     }
 
+    void testAlgorithm (char const* algorithm, key_strings const& strings)
+    {
+        testcase (algorithm);
+        
+        Json::Value params;
+        params["algorithm"] = algorithm;
+        params["passphrase"] = common::passphrase;
+
+        testSecretWallet (params, strings);
+        
+        params["seed"] = strings.master_seed;
+
+        // Secret fields are mutually exclusive.
+        expect (contains_error (WalletPropose (params)));
+
+        params.removeMember ("passphrase");
+
+        testSecretWallet (params, strings);
+    }
+
     void run()
     {
         testRandomWallet();
         testLegacyPassphrase();
+        testAlgorithm ("secp256k1", secp256k1_strings);
+        testAlgorithm ("ed25519",   ed25519_strings);
     }
 };
 
@@ -160,10 +193,32 @@ public:
         testLegacySecret (secp256k1_strings.master_seed_hex);
     }
 
+    void testAlgorithm (char const* algorithm, key_strings const& strings)
+    {
+        testcase (algorithm);
+        
+        Json::Value params;
+        params["algorithm"] = algorithm;
+        params["passphrase"] = common::passphrase;
+
+        testSecretWallet (params, strings);
+        
+        params["seed"] = strings.master_seed;
+
+        // Secret fields are mutually exclusive.
+        expectException ([&]() { (void) KeypairForSignature (params); });
+
+        params.removeMember ("passphrase");
+
+        testSecretWallet (params, strings);
+    }
+
     void run()
     {
         testEmpty();
         testLegacySecret();
+        testAlgorithm ("secp256k1", secp256k1_strings);
+        testAlgorithm ("ed25519",   ed25519_strings);
     }
 };
 
