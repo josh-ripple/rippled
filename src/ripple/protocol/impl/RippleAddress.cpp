@@ -29,6 +29,7 @@
 #include <ripple/protocol/Serializer.h>
 #include <ripple/protocol/RipplePublicKey.h>
 #include <beast/unit_test/suite.h>
+#include <ed25519-donna/ed25519.h>
 #include <openssl/ripemd.h>
 #include <openssl/pem.h>
 #include <mutex>
@@ -486,8 +487,23 @@ void RippleAddress::setAccountPublic (RippleAddress const& generator, int seq)
 }
 
 bool RippleAddress::accountPublicVerify (
-    uint256 const& uHash, Blob const& vucSig, ECDSA fullyCanonical) const
+    Blob const& message, Blob const& vucSig, ECDSA fullyCanonical) const
 {
+    if (vchData.size() == 33  &&  vchData[0] == 0xED)
+    {
+        if (vucSig.size() != 64)
+        {
+            return false;
+        }
+
+        uint8_t const* publicKey = &vchData[1];
+        uint8_t const* signature = &vucSig[0];
+
+        return ed25519_sign_open (message.data(), message.size(), publicKey, signature) == 0;
+    }
+
+    uint256 const uHash = getSHA512Half (message);
+
     return verifySignature (getAccountPublic(), uHash, vucSig, fullyCanonical);
 }
 
@@ -521,7 +537,7 @@ uint256 RippleAddress::getAccountPrivate () const
         throw std::runtime_error ("unset source - getAccountPrivate");
 
     case VER_ACCOUNT_PRIVATE:
-        return uint256 (vchData);
+        return uint256::fromVoid (vchData.data() + (vchData.size() - 32));
 
     default:
         throw std::runtime_error ("bad source: " + std::to_string(nVersion));
@@ -556,15 +572,30 @@ void RippleAddress::setAccountPrivate (
     setAccountPrivate (secretKey);
 }
 
-bool RippleAddress::accountPrivateSign (uint256 const& uHash, Blob& vucSig) const
+Blob RippleAddress::accountPrivateSign (Blob const& message) const
 {
-    vucSig = ECDSASign (uHash, getAccountPrivate());
-    const bool ok = !vucSig.empty();
+    if (vchData.size() == 33  &&  vchData[0] == 0xED)
+    {
+        uint8_t const*      secretKey = &vchData[1];
+        ed25519_public_key  publicKey;
+        Blob                signature (sizeof (ed25519_signature));
+
+        ed25519_publickey (secretKey, publicKey);
+
+        ed25519_sign (message.data(), message.size(), secretKey, publicKey, &signature[0]);
+
+        return signature;
+    }
+
+    uint256 const uHash = getSHA512Half (message);
+
+    Blob result = ECDSASign (uHash, getAccountPrivate());
+    const bool ok = !result.empty();
 
     CondLog (!ok, lsWARNING, RippleAddress)
             << "accountPrivateSign: Signing failed.";
 
-    return ok;
+    return result;
 }
 
 Blob RippleAddress::accountPrivateEncrypt (

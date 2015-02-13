@@ -129,7 +129,7 @@ public:
     void setAccountPublic (Blob const& vPublic);
     void setAccountPublic (RippleAddress const& generator, int seq);
 
-    bool accountPublicVerify (uint256 const& uHash, Blob const& vucSig,
+    bool accountPublicVerify (Blob const& message, Blob const& vucSig,
                               ECDSA mustBeFullyCanonical) const;
 
     static RippleAddress createAccountPublic (Blob const& vPublic)
@@ -159,7 +159,7 @@ public:
     void setAccountPrivate (RippleAddress const& naGenerator,
                             RippleAddress const& naSeed, int seq);
 
-    bool accountPrivateSign (uint256 const& uHash, Blob& vucSig) const;
+    Blob accountPrivateSign (Blob const& message) const;
 
     // Encrypt a message.
     Blob accountPrivateEncrypt (
