@@ -72,7 +72,9 @@ parseTransaction(TestAccount& account, Json::Value const& tx_json)
 {
     STParsedJSONObject parsed("tx_json", tx_json);
     std::unique_ptr<STObject> sopTrans = std::move(parsed.object);
-    expect(sopTrans != nullptr);
+    if (sopTrans != nullptr)
+        throw std::runtime_error(
+            "sopTrans != nullptr");
     sopTrans->setFieldVL(sfSigningPubKey, account.first.getAccountPublic());
     return STTx(*sopTrans);
 }
@@ -86,8 +88,12 @@ applyTransaction(Ledger::pointer const& ledger, STTx const& tx)
     bool didApply = false;
     auto r = engine.applyTransaction(tx, tapOPEN_LEDGER | tapNO_CHECK_SIGN,
                                         didApply);
-    expect(r == tesSUCCESS);
-    expect(didApply);
+    if (r != tesSUCCESS)
+        throw std::runtime_error(
+            "r != tesSUCCESS");
+    if (! didApply)
+        throw std::runtime_error(
+            "didApply");
 }
 
 // Create genesis ledger from a start amount in drops, and the public
@@ -100,7 +106,9 @@ createGenesisLedger(std::uint64_t start_amount_drops, TestAccount const& master)
                                                         start_amount_drops);
     ledger->updateHash();
     ledger->setClosed();
-    expect(ledger->assertSane());
+    if (! ledger->assertSane())
+        throw std::runtime_error(
+        "! ledger->assertSane()");
     return ledger;
 }
 
