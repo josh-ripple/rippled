@@ -38,7 +38,12 @@
 namespace ripple {
 namespace test {
 
-using TestAccount = std::pair<RippleAddress, unsigned>;
+    struct TestAccount
+    {
+        RippleAddress pk;
+        RippleAddress sk;
+        unsigned sequence;
+    };
 
 struct Amount
 {
@@ -58,7 +63,7 @@ struct Amount
     {
         Json::Value tx_json;
         tx_json["currency"] = currency;
-        tx_json["issuer"] = issuer.first.humanAccountID();
+        tx_json["issuer"] = issuer.pk.humanAccountID();
         tx_json["value"] = std::to_string(value);
         return tx_json;
     }
@@ -68,25 +73,28 @@ struct Amount
 // and return it as a STTx
 template <class = void>
 STTx
-parseTransaction(TestAccount& account, Json::Value const& tx_json)
+parseTransaction (TestAccount& account, Json::Value const& tx_json, bool sign = true)
 {
     STParsedJSONObject parsed("tx_json", tx_json);
     std::unique_ptr<STObject> sopTrans = std::move(parsed.object);
-    if (sopTrans != nullptr)
+    if (sopTrans == nullptr)
         throw std::runtime_error(
-            "sopTrans != nullptr");
-    sopTrans->setFieldVL(sfSigningPubKey, account.first.getAccountPublic());
-    return STTx(*sopTrans);
+            "sopTrans == nullptr");
+    sopTrans->setFieldVL(sfSigningPubKey, account.pk.getAccountPublic());
+    auto tx = STTx(*sopTrans);
+    if (sign)
+        tx.sign(account.sk);
+    return tx;
 }
 
 // Helper function to apply a transaction to a ledger
 template <class = void>
 void
-applyTransaction(Ledger::pointer const& ledger, STTx const& tx)
+applyTransaction(Ledger::pointer const& ledger, STTx const& tx, bool check = true)
 {
     TransactionEngine engine(ledger);
     bool didApply = false;
-    auto r = engine.applyTransaction(tx, tapOPEN_LEDGER | tapNO_CHECK_SIGN,
+    auto r = engine.applyTransaction(tx, tapOPEN_LEDGER | (check ? tapNONE : tapNO_CHECK_SIGN),
                                         didApply);
     if (r != tesSUCCESS)
         throw std::runtime_error(
@@ -102,7 +110,7 @@ template <class = void>
 Ledger::pointer
 createGenesisLedger(std::uint64_t start_amount_drops, TestAccount const& master)
 {
-    Ledger::pointer ledger = std::make_shared<Ledger>(master.first,
+    Ledger::pointer ledger = std::make_shared<Ledger>(master.pk,
                                                         start_amount_drops);
     ledger->updateHash();
     ledger->setClosed();
@@ -116,132 +124,136 @@ createGenesisLedger(std::uint64_t start_amount_drops, TestAccount const& master)
 // RippleAddress
 template <class = void>
 TestAccount
-createAccount()
+createAccount(std::string const& passphrase)
 {
-    static RippleAddress const seed
-            = RippleAddress::createSeedGeneric ("masterpassphrase");
-    static RippleAddress const generator
+    RippleAddress const seed
+            = RippleAddress::createSeedGeneric (passphrase);
+    RippleAddress const generator
             = RippleAddress::createGeneratorPublic (seed);
-    static int iSeq = -1;
-    ++iSeq;
-    return std::make_pair(RippleAddress::createAccountPublic(generator, iSeq),
-                            std::uint64_t(0));
+
+    return {
+        std::move (RippleAddress::createAccountPublic (generator, 0)),
+        std::move (RippleAddress::createAccountPrivate (generator, seed, 0)),
+        std::uint64_t (0)
+    };
 }
 
 template <class = void>
 void
-freezeAccount(TestAccount& account, Ledger::pointer const& ledger)
+freezeAccount(TestAccount& account, Ledger::pointer const& ledger, bool sign = true)
 {
     Json::Value tx_json;
     tx_json["TransactionType"] = "AccountSet";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Account"] = account.first.humanAccountID();
+    tx_json["Account"] = account.pk.humanAccountID();
     tx_json["SetFlag"] = asfGlobalFreeze;
-    tx_json["Sequence"] = ++account.second;
-    STTx tx = parseTransaction(account, tx_json);
-    applyTransaction(ledger, tx);
+    tx_json["Sequence"] = ++account.sequence;
+    STTx tx = parseTransaction(account, tx_json, sign);
+    applyTransaction(ledger, tx, sign);
 }
 
 template <class = void>
 void
-unfreezeAccount(TestAccount& account, Ledger::pointer const& ledger)
+unfreezeAccount (TestAccount& account, Ledger::pointer const& ledger, bool sign = true)
 {
     Json::Value tx_json;
     tx_json["TransactionType"] = "AccountSet";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Account"] = account.first.humanAccountID();
+    tx_json["Account"] = account.pk.humanAccountID();
     tx_json["ClearFlag"] = asfGlobalFreeze;
-    tx_json["Sequence"] = ++account.second;
-    STTx tx = parseTransaction(account, tx_json);
-    applyTransaction(ledger, tx);
+    tx_json["Sequence"] = ++account.sequence;
+    STTx tx = parseTransaction(account, tx_json, sign);
+    applyTransaction(ledger, tx, sign);
 }
 
 template <class = void>
-void
+STTx
 makePayment(TestAccount& from, TestAccount const& to,
             std::uint64_t amountDrops,
-            Ledger::pointer const& ledger)
+            Ledger::pointer const& ledger, bool sign = true, bool apply = true)
 {
     Json::Value tx_json;
-    tx_json["Account"] = from.first.humanAccountID();
+    tx_json["Account"] = from.pk.humanAccountID();
     tx_json["Amount"] = std::to_string(amountDrops);
-    tx_json["Destination"] = to.first.humanAccountID();
+    tx_json["Destination"] = to.pk.humanAccountID();
     tx_json["TransactionType"] = "Payment";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Sequence"] = ++from.second;
+    tx_json["Sequence"] = ++from.sequence;
     tx_json["Flags"] = tfUniversal;
-    STTx tx = parseTransaction(from, tx_json);
-    applyTransaction(ledger, tx);
+    STTx tx = parseTransaction(from, tx_json, sign);
+    if (apply)
+        applyTransaction (ledger, tx, sign);
+    return tx;
 }
 
 template <class = void>
 void
 makePayment(TestAccount& from, TestAccount const& to,
             std::string const& currency, std::string const& amount,
-            Ledger::pointer const& ledger)
+            Ledger::pointer const& ledger, bool sign = true)
 {
     Json::Value tx_json;
-    tx_json["Account"] = from.first.humanAccountID();
+    tx_json["Account"] = from.pk.humanAccountID();
     tx_json["Amount"] = Amount(std::stod(amount), currency, to).getJson();
-    tx_json["Destination"] = to.first.humanAccountID();
+    tx_json["Destination"] = to.pk.humanAccountID();
     tx_json["TransactionType"] = "Payment";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Sequence"] = ++from.second;
+    tx_json["Sequence"] = ++from.sequence;
     tx_json["Flags"] = tfUniversal;
-    STTx tx = parseTransaction(from, tx_json);
-    applyTransaction(ledger, tx);
+    STTx tx = parseTransaction(from, tx_json, sign);
+    applyTransaction(ledger, tx, sign);
 }
 
 template <class = void>
 void
 createOffer(TestAccount& from, Amount const& in, Amount const& out,
-            Ledger::pointer ledger)
+            Ledger::pointer ledger, bool sign = true)
 {
     Json::Value tx_json;
     tx_json["TransactionType"] = "OfferCreate";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Account"] = from.first.humanAccountID();
+    tx_json["Account"] = from.pk.humanAccountID();
     tx_json["TakerPays"] = in.getJson();
     tx_json["TakerGets"] = out.getJson();
-    tx_json["Sequence"] = ++from.second;
-    STTx tx = parseTransaction(from, tx_json);
-    applyTransaction(ledger, tx);
+    tx_json["Sequence"] = ++from.sequence;
+    STTx tx = parseTransaction(from, tx_json, sign);
+    applyTransaction(ledger, tx, sign);
 }
 
 // As currently implemented, this will cancel only the last offer made
 // from this account.
 template <class = void>
 void
-cancelOffer(TestAccount& from, Ledger::pointer ledger)
+cancelOffer (TestAccount& from, Ledger::pointer ledger, bool sign = true)
 {
     Json::Value tx_json;
     tx_json["TransactionType"] = "OfferCancel";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Account"] = from.first.humanAccountID();
-    tx_json["OfferSequence"] = from.second;
-    tx_json["Sequence"] = ++from.second;
-    STTx tx = parseTransaction(from, tx_json);
-    applyTransaction(ledger, tx);
+    tx_json["Account"] = from.pk.humanAccountID();
+    tx_json["OfferSequence"] = from.sequence;
+    tx_json["Sequence"] = ++from.sequence;
+    STTx tx = parseTransaction(from, tx_json, sign);
+    applyTransaction(ledger, tx, sign);
 }
 
 template <class = void>
 void
 makeTrustSet(TestAccount& from, TestAccount const& issuer,
                 std::string const& currency, double amount,
-                Ledger::pointer const& ledger)
+                Ledger::pointer const& ledger, bool sign = true)
 {
     Json::Value tx_json;
-    tx_json["Account"] = from.first.humanAccountID();
+    tx_json["Account"] = from.pk.humanAccountID();
     Json::Value& limitAmount = tx_json["LimitAmount"];
     limitAmount["currency"] = currency;
-    limitAmount["issuer"] = issuer.first.humanAccountID();
+    limitAmount["issuer"] = issuer.pk.humanAccountID();
     limitAmount["value"] = std::to_string(amount);
     tx_json["TransactionType"] = "TrustSet";
     tx_json["Fee"] = std::to_string(10);
-    tx_json["Sequence"] = ++from.second;
+    tx_json["Sequence"] = ++from.sequence;
     tx_json["Flags"] = tfClearNoRipple;
-    STTx tx = parseTransaction(from, tx_json);
-    applyTransaction(ledger, tx);
+    STTx tx = parseTransaction(from, tx_json, sign);
+    applyTransaction(ledger, tx, sign);
 }
 
 template <class = void>
