@@ -32,11 +32,13 @@ enum SignatureAlgorithm
     ed25519   = 1,
 };
 
+inline
 bool isInvalid (SignatureAlgorithm a)
 {
     return a < 0;
 }
 
+template <class = void>
 SignatureAlgorithm AlgorithmFromString (std::string const& s)
 {
     if (s == "secp256k1")  return secp256k1;
