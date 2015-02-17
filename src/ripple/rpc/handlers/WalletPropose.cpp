@@ -94,6 +94,7 @@ Json::Value WalletPropose (Json::Value const& params)
     obj["master_key"]     = naSeed.humanSeed1751();
     obj["account_id"]       = naAccount.humanAccountID ();
     obj["public_key"] = naAccount.humanAccountPublic();
+    obj["algorithm"] = stringOf (a);
 
     auto acct = naAccount.getAccountPublic();
     obj["public_key_hex"] = strHex(acct.begin(), acct.size());

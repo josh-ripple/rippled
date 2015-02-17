@@ -47,6 +47,13 @@ SignatureAlgorithm AlgorithmFromString (std::string const& s)
     return invalidSignatureAlgorithm;
 }
 
+inline const char* stringOf (SignatureAlgorithm a)
+{
+    return + a == secp256k1 ? "secp256k1"
+           : a == ed25519   ? "ed25519"
+           :                  "INVALID";
+}
+
 }
 
 #endif
