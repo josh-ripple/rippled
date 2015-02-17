@@ -193,6 +193,20 @@ public:
         testLegacySecret (secp256k1_strings.master_seed_hex);
     }
 
+    void testInvalidAlgorithm (char const* algorithm)
+    {
+        testcase (algorithm);
+
+        Json::Value params;
+        params["algorithm"] = algorithm;
+        params["passphrase"] = common::passphrase;
+
+        expectException ([&] ()
+        {
+            (void)KeypairForSignature (params);
+        });
+    }
+
     void testAlgorithm (char const* algorithm, key_strings const& strings)
     {
         testcase (algorithm);
@@ -217,6 +231,7 @@ public:
     {
         testEmpty();
         testLegacySecret();
+        testInvalidAlgorithm ("caesarsalad");
         testAlgorithm ("secp256k1", secp256k1_strings);
         testAlgorithm ("ed25519",   ed25519_strings);
     }
