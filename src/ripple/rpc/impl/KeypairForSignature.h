@@ -22,6 +22,7 @@
 
 #include <ripple/json/json_reader.h>
 #include <ripple/protocol/RippleAddress.h>
+#include <ripple/crypto/SignatureAlgorithm.h>
 
 namespace ripple {
 namespace RPC {
@@ -33,6 +34,7 @@ struct SignatureKeypair
 };
 
 SignatureKeypair KeypairForSignature (Json::Value const& params);
+SignatureKeypair KeypairForSignature (SignatureAlgorithm const& a, RippleAddress const& seed);
 
 } // RPC
 } // ripple

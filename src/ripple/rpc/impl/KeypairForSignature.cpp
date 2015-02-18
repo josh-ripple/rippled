@@ -18,7 +18,6 @@
 //==============================================================================
 
 #include <BeastConfig.h>
-#include <ripple/crypto/SignatureAlgorithm.h>
 #include <ripple/rpc/impl/KeypairForSignature.h>
 
 namespace ripple {
@@ -72,6 +71,11 @@ SignatureKeypair KeypairForSignature (Json::Value const& params)
         throw RPC::make_error (rpcBAD_SEED,
             RPC::invalid_field_message ("secret"));
 
+    return KeypairForSignature (a, seed);
+}
+
+SignatureKeypair KeypairForSignature (SignatureAlgorithm const& a, RippleAddress const& seed)
+{
     SignatureKeypair result;
 
     if (a == secp256k1)
@@ -80,13 +84,14 @@ SignatureKeypair KeypairForSignature (Json::Value const& params)
         result.secretKey.setAccountPrivate (generator, seed, 0);
         result.publicKey.setAccountPublic (generator, 0);
     }
-    else
+    else if (a == ed25519)
     {
         uint256 secretkey = KeyFromSeed (seed.getSeed());
 
         Blob ed25519_key (33);
         ed25519_key[0] = 0xED;
 
+        assert (secretkey.size() + 1 == ed25519_key.size());
         memcpy (&ed25519_key[1], secretkey.data(), secretkey.size());
         result.secretKey.setAccountPrivate (ed25519_key);
 
@@ -95,6 +100,13 @@ SignatureKeypair KeypairForSignature (Json::Value const& params)
 
         secretkey.zero();  // security erase
     }
+#ifndef NDEBUG
+    else
+    {
+        // This should have been checked by isInvalid in the caller
+        throw new std::runtime_error ("Invalid algorithm");
+    }
+#endif
 
     return result;
 }

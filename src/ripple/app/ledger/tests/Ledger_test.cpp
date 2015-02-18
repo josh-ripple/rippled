@@ -24,24 +24,24 @@ namespace test {
 
 class Ledger_test : public beast::unit_test::suite
 {
-    void test_genesisLedger (bool sign)
+    void test_genesisLedger (bool sign, SignatureAlgorithm algorithm)
     {
         std::uint64_t const xrp = std::mega::num;
 
-        auto master = createAccount ("masterpassphrase");
+        auto master = createAccount ("masterpassphrase", algorithm);
 
         Ledger::pointer LCL = createGenesisLedger(100000*xrp, master);
 
         Ledger::pointer ledger = std::make_shared<Ledger>(false, *LCL);
 
         // User accounts
-        auto gw1 = createAccount ("gw1");
+        auto gw1 = createAccount ("gw1", algorithm);
         expect (gw1.pk != master.pk, "gw1.pk != master.pk");
         expect (gw1.sk != master.sk, "gw1.sk != master.sk");
-        auto gw2 = createAccount ("gw2");
-        auto gw3 = createAccount ("gw3");
-        auto alice = createAccount ("alice");
-        auto mark = createAccount ("mark");
+        auto gw2 = createAccount ("gw2", algorithm);
+        auto gw3 = createAccount ("gw3", algorithm);
+        auto alice = createAccount ("alice", algorithm);
+        auto mark = createAccount ("mark", algorithm);
 
         // Fund gw1, gw2, gw3, alice, mark from master
         makePayment(master, gw1, 5000*xrp, ledger, sign);
@@ -90,17 +90,17 @@ class Ledger_test : public beast::unit_test::suite
         pass ();
     }
 
-    void test_unsigned_fails ()
+    void test_unsigned_fails (SignatureAlgorithm algorithm)
     {
         std::uint64_t const xrp = std::mega::num;
 
-        auto master = createAccount ("masterpassphrase");
+        auto master = createAccount ("masterpassphrase", algorithm);
 
         Ledger::pointer LCL = createGenesisLedger (100000 * xrp, master);
 
         Ledger::pointer ledger = std::make_shared<Ledger> (false, *LCL);
 
-        auto gw1 = createAccount ("gw1");
+        auto gw1 = createAccount ("gw1", algorithm);
 
         auto tx = makePayment (master, gw1, 5000 * xrp, ledger, false, false);
 
@@ -129,14 +129,23 @@ class Ledger_test : public beast::unit_test::suite
 public:
     void run ()
     {
-        testcase ("genesisLedger signed transactions");
-        test_genesisLedger (true);
+        testcase ("genesisLedger signed transactions secp256k1");
+        test_genesisLedger (true, secp256k1);
 
-        testcase ("genesisLedger unsigned transactions");
-        test_genesisLedger (false);
+        testcase ("genesisLedger signed transactions ed25519");
+        test_genesisLedger (true, ed25519);
 
-        testcase ("unsigned invalid");
-        test_unsigned_fails ();
+        testcase ("genesisLedger unsigned transactions secp256k1");
+        test_genesisLedger (false, secp256k1);
+
+        testcase ("genesisLedger unsigned transactions ed25519");
+        test_genesisLedger (false, ed25519);
+
+        testcase ("unsigned invalid secp256k1");
+        test_unsigned_fails (secp256k1);
+
+        testcase ("unsigned invalid ed25519");
+        test_unsigned_fails (ed25519);
 
         testcase ("getQuality");
         test_getQuality ();

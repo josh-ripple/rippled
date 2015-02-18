@@ -30,16 +30,21 @@ enum SignatureAlgorithm
 
     secp256k1 = 0,
     ed25519   = 1,
+
+    invalidLargeSignatureAlgorithm,
 };
 
+template <class = void>
 inline
-bool isInvalid (SignatureAlgorithm a)
+bool
+isInvalid (SignatureAlgorithm a)
 {
-    return a < 0;
+    return a <= invalidSignatureAlgorithm || a >= invalidLargeSignatureAlgorithm;
 }
 
 template <class = void>
-SignatureAlgorithm AlgorithmFromString (std::string const& s)
+SignatureAlgorithm
+AlgorithmFromString (std::string const& s)
 {
     if (s == "secp256k1")  return secp256k1;
     if (s == "ed25519"  )  return ed25519;

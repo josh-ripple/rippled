@@ -31,6 +31,7 @@
 #include <ripple/protocol/RippleAddress.h>
 #include <ripple/protocol/STParsedJSON.h>
 #include <ripple/protocol/TxFlags.h>
+#include <ripple/rpc/impl/KeypairForSignature.h>
 #include <beast/unit_test/suite.h>
 #include <chrono>
 #include <string>
@@ -124,16 +125,16 @@ createGenesisLedger(std::uint64_t start_amount_drops, TestAccount const& master)
 // RippleAddress
 template <class = void>
 TestAccount
-createAccount(std::string const& passphrase)
+createAccount(std::string const& passphrase, const SignatureAlgorithm& algorithm)
 {
     RippleAddress const seed
             = RippleAddress::createSeedGeneric (passphrase);
-    RippleAddress const generator
-            = RippleAddress::createGeneratorPublic (seed);
+    
+    auto keyPair = ripple::RPC::KeypairForSignature (algorithm, seed);
 
     return {
-        std::move (RippleAddress::createAccountPublic (generator, 0)),
-        std::move (RippleAddress::createAccountPrivate (generator, seed, 0)),
+        std::move (keyPair.publicKey),
+        std::move (keyPair.secretKey),
         std::uint64_t (0)
     };
 }

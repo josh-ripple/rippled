@@ -75,7 +75,7 @@ Json::Value WalletPropose (Json::Value const& params)
         RippleAddress naGenerator = RippleAddress::createGeneratorPublic (naSeed);
         naAccount.setAccountPublic (naGenerator, 0);
     }
-    else
+    else if (a == ed25519)
     {
         uint256 secretkey = KeyFromSeed (naSeed.getSeed());
 
@@ -86,6 +86,13 @@ Json::Value WalletPropose (Json::Value const& params)
 
         naAccount.setAccountPublic (publickey);
     }
+#ifndef NDEBUG
+    else
+    {
+        // This should have been checked by isInvalid
+        throw new std::runtime_error ("Invalid algorithm");
+    }
+#endif
 
     Json::Value obj (Json::objectValue);
 
