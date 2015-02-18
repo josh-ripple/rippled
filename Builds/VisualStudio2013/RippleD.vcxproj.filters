@@ -2559,6 +2559,9 @@
     <ClInclude Include="..\..\src\ripple\app\peers\UniqueNodeList.h">
       <Filter>ripple\app\peers</Filter>
     </ClInclude>
+    <ClCompile Include="..\..\src\ripple\app\tests\common_ledger.cpp">
+      <Filter>ripple\app\tests</Filter>
+    </ClCompile>
     <ClInclude Include="..\..\src\ripple\app\tests\common_ledger.h">
       <Filter>ripple\app\tests</Filter>
     </ClInclude>

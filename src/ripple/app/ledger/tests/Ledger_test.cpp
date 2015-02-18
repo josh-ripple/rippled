@@ -44,11 +44,11 @@ class Ledger_test : public beast::unit_test::suite
         auto mark = createAccount ("mark", algorithm);
 
         // Fund gw1, gw2, gw3, alice, mark from master
-        makePayment(master, gw1, 5000*xrp, ledger, sign);
-        makePayment (master, gw2, 4000 * xrp, ledger, sign);
-        makePayment (master, gw3, 3000 * xrp, ledger, sign);
-        makePayment (master, alice, 2000 * xrp, ledger, sign);
-        makePayment (master, mark, 1000 * xrp, ledger, sign);
+        makeAndApplyPayment(master, gw1, 5000 * xrp, ledger, sign);
+        makeAndApplyPayment(master, gw2, 4000 * xrp, ledger, sign);
+        makeAndApplyPayment(master, gw3, 3000 * xrp, ledger, sign);
+        makeAndApplyPayment(master, alice, 2000 * xrp, ledger, sign);
+        makeAndApplyPayment(master, mark, 1000 * xrp, ledger, sign);
 
         LCL = close_and_advance(ledger, LCL);
         ledger = std::make_shared<Ledger>(false, *LCL);
@@ -63,13 +63,13 @@ class Ledger_test : public beast::unit_test::suite
         makeTrustSet (mark, gw3, "FOO", 1, ledger, sign);
 
         // gw2 pays mark with FOO
-        makePayment (gw2, mark, "FOO", ".1", ledger, sign);
+        makeAndApplyPayment(gw2, mark, "FOO", ".1", ledger, sign);
 
         // gw3 pays mark with FOO
-        makePayment (gw3, mark, "FOO", ".2", ledger, sign);
+        makeAndApplyPayment(gw3, mark, "FOO", ".2", ledger, sign);
 
         // gw1 pays alice with FOO
-        makePayment (gw1, alice, "FOO", ".3", ledger, sign);
+        makeAndApplyPayment(gw1, alice, "FOO", ".3", ledger, sign);
 
         LCL = close_and_advance(ledger, LCL);
         ledger = std::make_shared<Ledger>(false, *LCL);
@@ -82,7 +82,7 @@ class Ledger_test : public beast::unit_test::suite
         LCL = close_and_advance(ledger, LCL);
         ledger = std::make_shared<Ledger>(false, *LCL);
 
-        makePayment (alice, mark, 1 * xrp, ledger, sign);
+        makeAndApplyPayment(alice, mark, 1 * xrp, ledger, sign);
 
         LCL = close_and_advance(ledger, LCL);
         ledger = std::make_shared<Ledger>(false, *LCL);
@@ -102,7 +102,7 @@ class Ledger_test : public beast::unit_test::suite
 
         auto gw1 = createAccount ("gw1", algorithm);
 
-        auto tx = makePayment (master, gw1, 5000 * xrp, ledger, false, false);
+        auto tx = makePayment(master, gw1, 5000 * xrp, false);
 
         try
         {

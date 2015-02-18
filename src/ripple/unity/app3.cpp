@@ -22,4 +22,5 @@
 #include <ripple/app/ledger/Ledger.cpp>
 #include <ripple/app/misc/AccountState.cpp>
 
+#include <ripple/app/tests/common_ledger.cpp>
 #include <ripple/app/ledger/tests/Ledger_test.cpp>

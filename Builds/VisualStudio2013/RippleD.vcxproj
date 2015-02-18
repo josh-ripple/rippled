@@ -1686,6 +1686,9 @@
     </ClCompile>
     <ClInclude Include="..\..\src\ripple\app\peers\UniqueNodeList.h">
     </ClInclude>
+    <ClCompile Include="..\..\src\ripple\app\tests\common_ledger.cpp">
+      <ExcludedFromBuild>True</ExcludedFromBuild>
+    </ClCompile>
     <ClInclude Include="..\..\src\ripple\app\tests\common_ledger.h">
     </ClInclude>
     <ClCompile Include="..\..\src\ripple\app\transactors\CancelOffer.cpp">
