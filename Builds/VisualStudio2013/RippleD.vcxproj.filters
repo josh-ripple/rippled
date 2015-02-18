@@ -310,6 +310,9 @@
     <Filter Include="ripple\app\peers">
       <UniqueIdentifier>{07831F2A-6752-E81C-87AF-4D47D425BE8E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ripple\app\tests">
+      <UniqueIdentifier>{2E791662-6ED0-D1E1-03A4-0CB35473EC56}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ripple\app\transactors">
       <UniqueIdentifier>{418BEF0D-AAAB-C368-7D9E-0A97636DE5A6}</UniqueIdentifier>
     </Filter>
@@ -2555,6 +2558,9 @@
     </ClCompile>
     <ClInclude Include="..\..\src\ripple\app\peers\UniqueNodeList.h">
       <Filter>ripple\app\peers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ripple\app\tests\common_ledger.h">
+      <Filter>ripple\app\tests</Filter>
     </ClInclude>
     <ClCompile Include="..\..\src\ripple\app\transactors\CancelOffer.cpp">
       <Filter>ripple\app\transactors</Filter>
