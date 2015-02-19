@@ -17,8 +17,8 @@
 */
 //==============================================================================
 
-#ifndef RIPPLE_APP_TESTS_COMMON_LEDGER_H_INCLUDEd
-#define RIPPLE_APP_TESTS_COMMON_LEDGER_H_INCLUDEd
+#ifndef RIPPLE_APP_TESTS_COMMON_LEDGER_H_INCLUDED
+#define RIPPLE_APP_TESTS_COMMON_LEDGER_H_INCLUDED
 
 #include <ripple/app/ledger/Ledger.h>
 #include <ripple/app/consensus/LedgerConsensus.h>
