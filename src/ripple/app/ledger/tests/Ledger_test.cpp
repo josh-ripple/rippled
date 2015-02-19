@@ -102,7 +102,7 @@ class Ledger_test : public beast::unit_test::suite
 
         auto gw1 = createAccount ("gw1", algorithm);
 
-        auto tx = makePayment(master, gw1, 5000 * xrp, false);
+        auto tx = getPaymentTx(master, gw1, 5000 * xrp, false);
 
         try
         {

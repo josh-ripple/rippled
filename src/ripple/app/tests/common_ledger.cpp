@@ -131,7 +131,7 @@ unfreezeAccount(TestAccount& account, Ledger::pointer const& ledger, bool sign)
 }
 
 STTx
-makePayment(TestAccount& from, TestAccount const& to,
+getPaymentTx(TestAccount& from, TestAccount const& to,
     std::uint64_t amountDrops,
     bool sign)
 {
@@ -151,13 +151,13 @@ makeAndApplyPayment(TestAccount& from, TestAccount const& to,
     std::uint64_t amountDrops,
     Ledger::pointer const& ledger, bool sign)
 {
-    auto tx = makePayment(from, to, amountDrops, sign);
+    auto tx = getPaymentTx(from, to, amountDrops, sign);
     applyTransaction(ledger, tx, sign);
     return tx;
 }
 
 STTx
-makePayment(TestAccount& from, TestAccount const& to,
+getPaymentTx(TestAccount& from, TestAccount const& to,
     std::string const& currency, std::string const& amount,
     bool sign)
 {
@@ -177,7 +177,7 @@ makeAndApplyPayment(TestAccount& from, TestAccount const& to,
     std::string const& currency, std::string const& amount,
     Ledger::pointer const& ledger, bool sign)
 {
-    auto tx = makePayment(from, to, currency, amount, sign);
+    auto tx = getPaymentTx(from, to, currency, amount, sign);
     applyTransaction(ledger, tx, sign);
     return tx;
 }

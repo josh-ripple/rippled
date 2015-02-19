@@ -85,7 +85,7 @@ void
 unfreezeAccount(TestAccount& account, Ledger::pointer const& ledger, bool sign = true);
 
 STTx
-makePayment(TestAccount& from, TestAccount const& to,
+getPaymentTx(TestAccount& from, TestAccount const& to,
             std::uint64_t amountDrops,
             bool sign = true);
 
@@ -95,7 +95,7 @@ makeAndApplyPayment(TestAccount& from, TestAccount const& to,
             Ledger::pointer const& ledger, bool sign = true);
 
 STTx
-makePayment(TestAccount& from, TestAccount const& to,
+getPaymentTx(TestAccount& from, TestAccount const& to,
             std::string const& currency, std::string const& amount,
             bool sign = true);
 
