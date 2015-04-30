@@ -38,15 +38,11 @@ Add the `validation_seed` value (the ephemeral secret key) to this validator's c
 
 	[validation_seed]
 	sahzkAajS2dyhXNg2yovjdZhXmjsx
-	#validation_public_key: n9JzKV3ZrcZ3DW5fwpqka4hpijJ9oMiyrPDGJc3mpsndL6Gf3zwd
+	# validation_public_key: n9JzKV3ZrcZ3DW5fwpqka4hpijJ9oMiyrPDGJc3mpsndL6Gf3zwd
 
 3. Create a signed manifest
 
-(Don't actually copy the secret key to an environment variable.  This is for readability only.)
-
-	$ validation_public_key=n9JzKV3ZrcZ3DW5fwpqka4hpijJ9oMiyrPDGJc3mpsndL6Gf3zwd
-	$ master_secret=pnxayCakmZRQE2qhEVRTFbiWCunReSbN1z64vPL36qwyLgogyYc
-	$ bin/manifest sign 1 $validation_public_key $master_secret
+	$ bin/manifest sign 1 n9JzKV3Z...L6Gf3zwd pnxayCak...yLgogyYc
 
 Sample output:
 
