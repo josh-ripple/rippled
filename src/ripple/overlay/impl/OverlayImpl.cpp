@@ -641,7 +641,7 @@ OverlayImpl::onManifests (Job&,
 
 			for_each( [&](std::shared_ptr<PeerImp> const& peer)
 			{
-				if (hashRouter.addSuppressionPeer (hash, peer->id())  &&  peer != from)
+				if (hashRouter.suppressHashForPeer (hash, peer->id())  &&  peer != from)
 				{
 					if (auto& j = peer->pjournal().warning)
 					    j << "Forwarding manifest with hash " << hash;
