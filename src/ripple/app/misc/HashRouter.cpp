@@ -100,6 +100,7 @@ public:
     bool addSuppressionPeer (uint256 const& index, PeerShortID peer);
     bool addSuppressionPeer (uint256 const& index, PeerShortID peer, int& flags);
     bool addSuppressionFlags (uint256 const& index, int flag);
+    bool suppressHashForPeer (uint256 const& index, PeerShortID peer);
     bool setFlag (uint256 const& index, int flag);
     int getFlags (uint256 const& index);
 
@@ -189,6 +190,21 @@ bool HashRouter::addSuppressionPeer (uint256 const& index, PeerShortID peer, int
     s.addPeer (peer);
     flags = s.getFlags ();
     return created;
+}
+
+bool HashRouter::suppressHashForPeer (uint256 const& index, PeerShortID peer)
+{
+    ScopedLockType lock (mMutex);
+
+    bool created;
+    Entry& s = findCreateEntry (index, created);
+    if (s.hasPeer (peer))
+    {
+        return false;
+    }
+
+    s.addPeer (peer);
+    return true;
 }
 
 int HashRouter::getFlags (uint256 const& index)

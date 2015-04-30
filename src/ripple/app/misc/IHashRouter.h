@@ -70,6 +70,12 @@ public:
 
     virtual bool addSuppressionFlags (uint256 const& index, int flag) = 0;
 
+    /** Add a hash-id tuple.
+
+        @return `true` if the hash-id tuple was added (didn't already exist).
+    */
+    virtual bool suppressHashForPeer (uint256 const& index, PeerShortID peer) = 0;
+
     /** Set the flags on a hash.
 
         @return `true` if the flags were changed.
