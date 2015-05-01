@@ -627,6 +627,12 @@ OverlayImpl::onManifests (Job&,
 
         uint256 const hash = getSHA512Half (s);
 
+        bool created = hashRouter.addSuppressionPeer (hash, from->id());
+        if (! created)
+        {
+            continue;
+        }
+
         auto const result = manifestCache_.applyManifest (s, journal);
 
         if (result == ManifestDisposition::accepted)
