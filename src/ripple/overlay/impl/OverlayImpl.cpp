@@ -621,8 +621,6 @@ OverlayImpl::onManifests (Job&,
     if (journal.debug) journal.debug
         << "TMManifest, " << n << (n == 1 ? " item" : " items");
 
-    protocol::TMManifests outbox;
-
     for (std::size_t i = 0; i < n; ++i)
     {
         auto& s = inbox->list().Get(i).stobject();
