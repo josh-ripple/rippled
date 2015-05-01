@@ -15,7 +15,7 @@ Sample output:
 	[master_secret]
 	pnxayCakmZRQE2qhEVRTFbiWCunReSbN1z64vPL36qwyLgogyYc
 
-The first value is the master public key, which must be added to the config for this validator as well as any other rippled trusting it.  The second value is the corresponding secret key, which must be added only to the config for this validator.
+The first value is the master public key, which must be added to the config for this validator as well as any other rippled trusting it.  The second value is the corresponding secret key.  DO NOT INSTALL THIS IN THE CONFIG.
 
 2. Create a new ephemeral key pair
 
